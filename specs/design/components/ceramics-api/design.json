@@ -7,30 +7,46 @@
   "appPath": "ceramics-api",
   "entrypoint": "deployment/service",
   "exposure": "internet",
+  "description": "Go backend service owning the product catalog, shopping cart, checkout, and order data for the ceramics storefront. Exposes a REST API consumed by ceramics-webapp: catalog browse/search/admin-CRUD, per-shopper cart management, checkout (stock validation, payment charge via the payment provider, order creation, stock decrement), and order history. Persists all data in an embedded-schema relational database (postgres platform resource) keyed by owning-shopper id where applicable. Does not render any UI and does not issue its own auth tokens.",
   "dependencies": [
     {
       "kind": "platform-resource",
       "name": "ceramics-db",
+      "description": "Relational database storing products, carts, orders, order items, and shipping addresses.",
       "resourceType": "postgres",
-      "parameters": { "size": "small" },
-      "description": "Relational database storing products, carts, orders, order items, and shipping addresses."
+      "parameters": {
+        "size": "small"
+      }
     },
     {
       "kind": "platform-resource",
       "name": "user-auth",
+      "description": "Thunder OIDC sign-in for shoppers and administrators; the gateway validates the caller's token against this app and injects identity/role headers on every request.",
       "resourceType": "thunder-app",
-      "parameters": { "scopes": "openid profile email" },
-      "description": "Thunder OIDC sign-in for shoppers and administrators; the gateway validates the caller's token against this app and injects identity/role headers on every request."
+      "parameters": {
+        "scopes": "openid profile email"
+      }
     },
     {
       "kind": "external",
       "name": "payment-provider",
+      "description": "Third-party payment provider SDK used to charge the shopper's payment method for the order total during checkout.",
       "config": [
-        { "key": "PAYMENT_PROVIDER_API_KEY", "secret": true, "description": "Secret API key for the payment provider used to charge orders at checkout." }
-      ],
-      "description": "Third-party payment provider SDK used to charge the shopper's payment method for the order total during checkout."
+        {
+          "key": "PAYMENT_PROVIDER_API_KEY",
+          "secret": true,
+          "description": "Secret API key for the payment provider used to charge orders at checkout."
+        }
+      ]
     }
   ],
-  "description": "Go backend service owning the product catalog, shopping cart, checkout, and order data for the ceramics storefront. Exposes a REST API consumed by ceramics-webapp: catalog browse/search/admin-CRUD, per-shopper cart management, checkout (stock validation, payment charge via the payment provider, order creation, stock decrement), and order history. Persists all data in an embedded-schema relational database (postgres platform resource) keyed by owning-shopper id where applicable. Does not render any UI and does not issue its own auth tokens.",
-  "skillsApplied": ["openapi-conventions", "go", "api-management", "thunder-authentication"]
+  "exposesAPI": {
+    "auth": "end-user-required"
+  },
+  "skillsApplied": [
+    "openapi-conventions",
+    "go",
+    "api-management",
+    "thunder-authentication"
+  ]
 }
